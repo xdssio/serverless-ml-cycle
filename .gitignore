@@ -1,3 +1,5 @@
 .idea
 datasets
 docs
+*.pyc
+.ipynb_checkpoints
