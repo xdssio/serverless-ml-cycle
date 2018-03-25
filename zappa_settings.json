@@ -7,67 +7,21 @@
     "runtime": "python3.6",
     "s3_bucket": "xdss-serverless-ml",
     "models_bucket": "serverless-ml-models",
-    "model_features": ["Fare", "Age", "Pclass", "SibSp"],
-    "model_target":"Survived",
-
-    "aws_environment_variables": {
-      "ENVIRONMENT": "dev",
-      "VERSION": "1"
-    },
-    "environment_variables": {
-      "ENVIRONMENT": "dev",
-      "VERSION": "1"
-    },
-    "exclude": [
-      "tests",
-      "datasets",
-      "notebooks",
-      "docs"
+    "model_features": [
+      "Fare",
+      "Age",
+      "Pclass",
+      "SibSp"
     ],
-    "slim_handler": true,
-    "keep_warm": true,
-    "use_precompiled_packages": false,
-    "apigateway_enabled": true
-  },
-  "qa": {
-    "app_function": "app.app",
-    "aws_region": "eu-west-1",
-    "profile_name": "default",
-    "project_name": "TODO",
-    "runtime": "python3.6",
-    "s3_bucket": "xdss-serverless-ml",
+    "model_target": "Survived",
     "aws_environment_variables": {
       "ENVIRONMENT": "dev",
+      "STAGE": "dev",
       "VERSION": "1"
     },
     "environment_variables": {
       "ENVIRONMENT": "dev",
-      "VERSION": "1"
-    },
-    "exclude": [
-      "tests",
-      "datasets",
-      "notebooks",
-      "docs"
-    ],
-    "slim_handler": true,
-    "keep_warm": true,
-    "use_precompiled_packages": false,
-    "apigateway_enabled": true
-  },
-  "prod": {
-    "app_function": "app.app",
-    "aws_region": "eu-west-1",
-    "profile_name": "default",
-    "project_name": "serverless-ml",
-    "runtime": "python3.6",
-    "s3_bucket": "TODO",
-    "aws_environment_variables": {
-      "ENVIRONMENT": "dev",
-      "VERSION": "1"
-    },
-    "environment_variables": {
-      "ENVIRONMENT": "dev",
+      "STAGE": "dev",
       "VERSION": "1"
     },
     "exclude": [
