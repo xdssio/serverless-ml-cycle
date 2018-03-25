@@ -3,6 +3,7 @@ import logging
 
 from flask import abort, Response, app
 
+from ml.s3_connector import update_function_dersion
 from ml.utils import get_pipeline
 
 logging.basicConfig()
@@ -55,8 +56,10 @@ def validate_input(json_data):
 @app.route('/update', methods=['POST'])
 def update(event=None, context=None):
     global estimator
+    #TODO
     try:
         ret = None
+        update_function_dersion()
     except Exception as e:
         logger.debug(e)
         ret = str(e)
@@ -70,6 +73,7 @@ def invocations(event=None, context=None):
 
 @app.route('/recommend', methods=['GET', 'POST'])
 def recommend(event=None, context=None):
+    # TODO
     try:
         ret = None
 
@@ -82,6 +86,7 @@ def recommend(event=None, context=None):
 
 @app.route('/train', methods=['POST'])
 def train(event=None, context=None):
+    # TODO
     pass
 
 
