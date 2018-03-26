@@ -2,7 +2,7 @@ import os
 
 import boto3
 
-from ml.utils import get_settings_value, mkdir, mkdirs,get_function_name
+from ml.utils import get_settings_value, mkdir, mkdirs, get_function_name
 
 s3_connection = boto3.client('s3')
 model_bucket = s3_connection.get_bucket(get_settings_value('model_bucket'))
@@ -27,7 +27,6 @@ def upload_to_s3(bucketname, path):
         for file in files:
             file_path = os.path.join(root, file)
             s3_connection.upload_file(file_path, bucketname, file_path)
-
 
 
 def update_function_dersion(version=None, function_name=None):
