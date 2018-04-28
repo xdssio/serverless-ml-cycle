@@ -1,44 +1,54 @@
+import datetime as dt
 import io
+import os
 
 import boto3
-import datetime.datetime as dt
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
 
-from ml.pipeline import pipeline
+from ml.pipeline import create_pipeline
 from ml.utils import get_settings_value
 
 
 class Model():
     def __init__(self):
-        self.created = dt.now()
+        self.created = dt.datetime.now()
         self.updated = self.created
         self.version = -1
-        self.pipeline = pipeline
-        self.pipeline.steps.append(['estimator', RandomForestClassifier()])
+        self.pipeline = create_pipeline()
+        self.estimator = RandomForestClassifier()
+        self.pipeline.steps.append(('estimator', self.estimator))
         self.features = get_settings_value('model_features')
         self.target = get_settings_value('model_target')
+        self.model_name = get_settings_value('model_name')
 
     def increment(self):
         self.version += 1
 
-    def train(self):
-        df = self.get_data()
-        self.pipeline.fit(X=df[self.features], y=self.target)
+    def fit(self, data=None, save=True):
+        data = data if data is not None else self.get_data()
+        self.pipeline.fit(X=data[self.features], y=data[self.target])
         self.increment()
-        self.save()
+        if save:
+            self.save()
 
     def predict(self, X):
-        return self.pipeline.predict(X)
+        return self.pipeline.predict(X[self.features])
 
     def innovations(self):
+        """
+        When you want to run on a csv
+        """
         pass
 
     def health(self):
         return self.pipeline is not None
 
-    def preprocess(self):
-        pass
+    def preprocess(self, data):
+        data['Sex'] = data['Sex'].astype('bool')
+        data['Pclass'] = data['Pclass'].astype('category')
+        return data.dropna()
 
     def get_data(self, from_date=None, to_date=None):
         """
@@ -48,15 +58,30 @@ class Model():
         :return:
         """
         s3 = boto3.client('s3')
-        obj = s3.get_object(Bucket='xdss-public-datasets', Key='kaggle/titanic_data.csv')
-        return pd.read_csv(io.BytesIO(obj['Body'].read()))
+        bucket = get_settings_value('data_bucket')
+        key = get_settings_value('data_key')
+        obj = s3.get_object(Bucket=bucket, Key=key)
+        df = pd.read_csv(io.BytesIO(obj['Body'].read()))
+        return self.preprocess(df)
 
-    def save(self):
-        pass
-
-    def upload(self):
-        pass
+    def save(self, model_name=None, bucket=None):
+        s3 = boto3.client('s3')
+        model_key = model_name if model_name else get_settings_value('model_name')
+        bucket = bucket if bucket else get_settings_value('models_bucket')
+        model_path = '/'.join(['./tmp', model_key])
+        os.makedirs('./tmp', exist_ok=True)
+        joblib.dump(self, model_path)
+        resp = s3.put_object(Body=open(model_path, 'rb'), Bucket=bucket, Key=model_key)
+        return resp
 
     @staticmethod
-    def download(self):
-        pass
+    def load(model_name=None, bucket=None):
+        s3 = boto3.client('s3')
+        model_key = model_name if model_name else get_settings_value('model_name')
+        bucket = bucket if bucket else get_settings_value('models_bucket')
+        obj_string = s3.get_object(Bucket=bucket, Key=model_key)['Body'].read()
+        model_path = '/'.join(['./tmp', model_key])
+        with open(model_path, "wb") as the_file:
+            the_file.write(obj_string)
+        model = joblib.load(model_path)
+        return model
