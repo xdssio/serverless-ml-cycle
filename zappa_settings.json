@@ -7,11 +7,16 @@
     "runtime": "python3.6",
     "s3_bucket": "xdss-serverless-ml",
     "models_bucket": "serverless-ml-models",
+    "data_bucket":"xdss-public-datasets",
+    "data_key":"kaggle/titanic_data.csv",
+    "model_name": "titanic-model",
     "model_features": [
       "Fare",
       "Age",
       "Pclass",
-      "SibSp"
+      "SibSp",
+      "Embarked",
+      "Sex"
     ],
     "model_target": "Survived",
     "aws_environment_variables": {
