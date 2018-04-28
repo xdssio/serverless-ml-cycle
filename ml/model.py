@@ -28,13 +28,14 @@ class Model():
 
     def fit(self, data=None, save=True):
         data = data if data is not None else self.get_data()
+        data = self.preprocess(data)
         self.pipeline.fit(X=data[self.features], y=data[self.target])
         self.increment()
         if save:
             self.save()
 
     def predict(self, X):
-        return self.pipeline.predict(X[self.features])
+        return self.pipeline.predict(X)
 
     def innovations(self):
         """
@@ -50,7 +51,8 @@ class Model():
         data['Pclass'] = data['Pclass'].astype('category')
         return data.dropna()
 
-    def get_data(self, from_date=None, to_date=None):
+    @staticmethod
+    def get_data(from_date=None, to_date=None):
         """
         In the future, you miight want to get only new data
         :param from_date:
@@ -62,7 +64,7 @@ class Model():
         key = get_settings_value('data_key')
         obj = s3.get_object(Bucket=bucket, Key=key)
         df = pd.read_csv(io.BytesIO(obj['Body'].read()))
-        return self.preprocess(df)
+        return df
 
     def save(self, model_name=None, bucket=None):
         s3 = boto3.client('s3')
