@@ -3,3 +3,5 @@ datasets
 docs
 *.pyc
 .ipynb_checkpoints
+/.pytest_cache
+/tmp
