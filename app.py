@@ -4,16 +4,19 @@ from io import StringIO
 
 import flask
 import pandas as pd
-from flask import abort, Response, app, request, make_response, Flask, jsonify
+from flask import abort, Response, request, make_response, Flask
 
 from ml.model import Model
+from ml.utils import get_settings_value, get_version
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 app = Flask(__name__)
-model = Model.load()
+model_name = get_settings_value('model_name')
+version = get_version(model_name)
+model = Model.load(model_name=model_name, version=version)
 
 
 def response(response, status=200, json_dumps=True, mimetype='application/json'):
@@ -63,18 +66,18 @@ def update(event=None, context=None):
 @app.route('/predict', methods=['GET', 'POST'])
 def predict(event=None, context=None):
     logger.info('predict')
+    ret = None
     try:
         if flask.request.content_type == 'text/csv':
             data = flask.request.data.decode('utf-8')
             s = StringIO(data)
             data = pd.read_csv(s)
-            predictions = model.predict(data.head())
+            predictions = model.predict(data)
             df = pd.DataFrame({'results': predictions})
             resp = make_response(df.to_csv())
             resp.headers["Content-Disposition"] = "attachment; filename=predictions.csv"
             resp.headers["Content-Type"] = "text/csv"
             ret = resp
-            return resp
 
         elif flask.request.content_type == 'application/json':
             j = request.get_json()
@@ -86,8 +89,6 @@ def predict(event=None, context=None):
             resp.headers["Content-Type"] = "application/json"
             ret = resp
 
-            # ret = flask.Response(response=result, status=200, mimetype='application/json')
-
     except Exception as e:
         logger.debug(e)
         ret = str(e)
@@ -97,8 +98,11 @@ def predict(event=None, context=None):
 
 @app.route('/train', methods=['POST'])
 def train(event=None, context=None):
+    global model
     logger.info('train')
-    pass
+    model.fit()
+    logger.info('done train model with v%d' % model.version)
+    return make_response(flask.jsonify({"version": model.version}))
 
 
 if __name__ == '__main__':

@@ -10,6 +10,8 @@
     "data_bucket":"xdss-public-datasets",
     "data_key":"kaggle/titanic_data.csv",
     "model_name": "titanic-model",
+    "tmp_folder":"./tmp",
+    "model_key_name":"model.pkl",
     "model_features": [
       "Fare",
       "Age",
