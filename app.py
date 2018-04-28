@@ -1,16 +1,19 @@
 import json
 import logging
+from io import StringIO
 
-from flask import abort, Response, app
+import flask
+import pandas as pd
+from flask import abort, Response, app, request, make_response, Flask, jsonify
 
-from ml.s3_connector import update_function_dersion
-from ml.utils import get_pipeline
+from ml.model import Model
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-estimator = get_pipeline()
+app = Flask(__name__)
+model = Model.load()
 
 
 def response(response, status=200, json_dumps=True, mimetype='application/json'):
@@ -26,12 +29,7 @@ def bad_request(message="", code=400):
 
 @app.route('/version', methods=['GET'])
 def version(event=None, context=None):
-    pass
-
-
-@app.route('/versions', methods=['GET'])
-def versions(event=None, context=None):
-    pass
+    return response(model.version)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -44,49 +42,62 @@ def lambda_handler(event=None, context=None):
 @app.route('/ping', methods=['GET', 'POST'])
 def ping(event=None, context=None):
     logger.info('ping')
-    health = True
+    health = model is not None
     status = 200 if health else 404
     return response('ping', status=status, json_dumps=False)
 
 
-def validate_input(json_data):
-    pass
-
-
 @app.route('/update', methods=['POST'])
 def update(event=None, context=None):
-    global estimator
-    #TODO
+    global model
+    # TODO
     try:
         ret = None
-        update_function_dersion()
+        # update_function_version()
     except Exception as e:
         logger.debug(e)
         ret = str(e)
     return response(ret, json_dumps=True)
 
 
-@app.route('/invocations', methods=['GET', 'POST'])
-def invocations(event=None, context=None):
-    return recommend()
-
-
-@app.route('/recommend', methods=['GET', 'POST'])
-def recommend(event=None, context=None):
-    # TODO
+@app.route('/predict', methods=['GET', 'POST'])
+def predict(event=None, context=None):
+    logger.info('predict')
     try:
-        ret = None
+        if flask.request.content_type == 'text/csv':
+            data = flask.request.data.decode('utf-8')
+            s = StringIO(data)
+            data = pd.read_csv(s)
+            predictions = model.predict(data.head())
+            df = pd.DataFrame({'results': predictions})
+            resp = make_response(df.to_csv())
+            resp.headers["Content-Disposition"] = "attachment; filename=predictions.csv"
+            resp.headers["Content-Type"] = "text/csv"
+            ret = resp
+            return resp
+
+        elif flask.request.content_type == 'application/json':
+            j = request.get_json()
+            data = pd.DataFrame(j)
+            predictions = model.predict(data)
+            df = pd.DataFrame({'results': predictions})
+            result = json.dumps(df.to_json(orient='values'))
+            resp = make_response(result)
+            resp.headers["Content-Type"] = "application/json"
+            ret = resp
+
+            # ret = flask.Response(response=result, status=200, mimetype='application/json')
 
     except Exception as e:
         logger.debug(e)
         ret = str(e)
 
-    return response(ret, json_dumps=False)
+    return ret
 
 
 @app.route('/train', methods=['POST'])
 def train(event=None, context=None):
-    # TODO
+    logger.info('train')
     pass
 
 
