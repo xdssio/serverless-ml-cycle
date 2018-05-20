@@ -29,7 +29,8 @@ def test_train():
 
 def test_save_and_load():
     test_name = 'test-model'
-    s3 = boto3.resource('s3')
+    session = boto3.Session()
+    s3 = session.resource('s3')
     obj = s3.Object(get_settings_value('models_bucket'), test_name)
     obj.delete()
 
