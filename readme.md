@@ -3,25 +3,25 @@ Serverless AI is a project demonstrating how to have the entire data science cyc
 
 ## Deployment
 ```
-docker build -t serverlessai .
+docker build -t serverlessml .
 
 # one time
-alias serverlessai='docker run -ti -v $(pwd):/var/task -v ~/.aws/:/root/.aws -p 8080:8080 --rm serverlessai'
-alias serverlessai >> ~/.bash_profile
+alias serverlessml='docker run -ti -v $(pwd):/var/task -v ~/.aws/:/root/.aws -p 8080:8080 --rm serverlessml'
+alias serverlessml >> ~/.bash_profile
 
-serverlessai:
-serverlessai>  virtualenv ve
-serverlessai> source ve/bin/activate
-serverlessai> pip install --no-binary -U numpy
-serverlessai> pip install --no-binary -U pandas
-serverlessai> pip install --no-binary -U sklearn
-serverlessai> pip install --no-binary -U sklearn_pandas
-serverlessai> pip install flask zappa boto3
-serverlessai> pip install -r requirements.txt
-serverlessai> find . -name \*.pyc -delete
+serverlessml:
+serverlessml>  virtualenv ve
+serverlessml> source ve/bin/activate
+serverlessml> pip install --no-binary -U numpy
+serverlessml> pip install --no-binary -U pandas
+serverlessml> pip install --no-binary -U sklearn
+serverlessml> pip install --no-binary -U sklearn_pandas
+serverlessml> pip install flask zappa boto3
+serverlessml> pip install -r requirements.txt
+serverlessml> find . -name \*.pyc -delete
 
 # test
-serverlessai> python app.py
+serverlessml> python app.py
 ```
 
 # zappa
@@ -35,18 +35,21 @@ in zappa_settings.json change:
 * data_bucket
 
 ```
-serverlessai> zappa deploy dev
-serverlessai> zappa update dev
-serverlessai> zappa undepoloy dev
-serverlessai> zappa schedule dev
-serverlessai> zappa unschedule dev
+serverlessml> zappa deploy dev
+serverlessml> zappa update dev
+serverlessml> zappa undeploy dev
+serverlessml> zappa schedule dev
+serverlessml> zappa unschedule dev
 
 ````
 
 
 ## Tests
+you can run locally with:   
+`python app.py`
+
 ```
-export URL=localhost:8080 # change to your uel after deployment
+export URL=localhost:8080 # for testing locally
 export URL=https://gfjbjoo9b4.execute-api.eu-west-1.amazonaws.com/dev
 curl $URL/ping -w "\n\n"
 curl $URL/version -w "\n\n"
