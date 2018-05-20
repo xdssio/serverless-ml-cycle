@@ -1,25 +1,27 @@
 import datetime as dt
 import io
-import os
 import pathlib
 
 import boto3
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
 
 from ml.pipeline import create_pipeline
 from ml.utils import get_settings_value
 
 
-class Model():
+def preprocess(data):
+    data['Sex'] = data['Sex'].astype('bool')
+    data['Pclass'] = data['Pclass'].astype('category')
+    return data.dropna()
+
+
+class Model:
     def __init__(self):
         self.created = dt.datetime.now()
         self.updated = self.created
         self.version = -1
         self.pipeline = create_pipeline()
-        self.estimator = RandomForestClassifier()
-        self.pipeline.steps.append(('estimator', self.estimator))
         self.features = get_settings_value('model_features')
         self.target = get_settings_value('model_target')
         self.model_name = get_settings_value('model_name')
@@ -29,7 +31,7 @@ class Model():
 
     def fit(self, data=None, save=True):
         data = data if data is not None else self.get_data()
-        data = self.preprocess(data)
+        data = preprocess(data)
         self.pipeline.fit(X=data[self.features], y=data[self.target])
         self.increment()
         if save:
@@ -50,15 +52,10 @@ class Model():
     def health(self):
         return self.pipeline is not None
 
-    def preprocess(self, data):
-        data['Sex'] = data['Sex'].astype('bool')
-        data['Pclass'] = data['Pclass'].astype('category')
-        return data.dropna()
-
     @staticmethod
     def get_data(from_date=None, to_date=None):
         """
-        In the future, you miight want to get only new data
+        In the future, you might want to get only new data
         :param from_date:
         :param to_date:
         :return:
@@ -78,7 +75,7 @@ class Model():
         model_key_name = get_settings_value('model_key_name')
         model_version = str(self.version)
         model_tmp_folder = get_settings_value('tmp_folder')
-        model_location = '/'.join([model_tmp_folder,model_name, model_version])
+        model_location = '/'.join([model_tmp_folder, model_name, model_version])
         pathlib.Path(model_location).mkdir(parents=True, exist_ok=True)
         model_path = '/'.join([model_location, model_key_name])
         joblib.dump(self, model_path)
@@ -108,3 +105,6 @@ class Model():
         model_key_name = get_settings_value('model_key_name')
         model_name = model_name if model_name else get_settings_value('model_name')
         return '/'.join([model_name, str(version), model_key_name])
+
+    def get_estimator(self):
+        return self.pipeline.steps[-1][1]

@@ -1,4 +1,5 @@
 import sklearn.preprocessing as pp
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn_pandas import CategoricalImputer
 from sklearn_pandas import DataFrameMapper
@@ -13,5 +14,6 @@ mapper = DataFrameMapper([
 
 def create_pipeline():
     return Pipeline([
-        ('featurize', mapper),
+        ('process', mapper),
+        ('estimator', RandomForestClassifier())
     ])
