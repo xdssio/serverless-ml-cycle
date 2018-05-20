@@ -10,12 +10,6 @@ from ml.pipeline import create_pipeline
 from ml.utils import get_settings_value
 
 
-def preprocess(data):
-    data['Sex'] = data['Sex'].astype('bool')
-    data['Pclass'] = data['Pclass'].astype('category')
-    return data.dropna()
-
-
 class Model:
     def __init__(self):
         self.created = dt.datetime.now()
@@ -29,9 +23,15 @@ class Model:
     def increment(self):
         self.version += 1
 
+    def preprocess(self, data):
+        # We don't really need this, but for possible use cases
+        data['Sex'] = data['Sex'].astype('bool')
+        data['Pclass'] = data['Pclass'].astype('category')
+        return data.dropna()
+
     def fit(self, data=None, save=True):
         data = data if data is not None else self.get_data()
-        data = preprocess(data)
+        data = self.preprocess(data)
         self.pipeline.fit(X=data[self.features], y=data[self.target])
         self.increment()
         if save:
@@ -45,7 +45,7 @@ class Model:
 
     def innovations(self):
         """
-        When you want to run on a csv
+        When you want to run on a csv or fit to the Sagemaker API
         """
         pass
 
