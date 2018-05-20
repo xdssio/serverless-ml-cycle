@@ -7,6 +7,12 @@ from ml.utils import get_settings_value
 data = Model.get_data()
 
 
+def test_get_estimator():
+    model = Model()
+    estimator = model.get_estimator()
+    assert estimator is not None
+
+
 def test_get_data():
     model = Model()
     df = model.get_data()
