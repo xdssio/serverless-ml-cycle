@@ -19,10 +19,10 @@ version = get_version(model_name)
 model = Model.load(model_name=model_name, version=version)
 
 
-def response(response, status=200, json_dumps=True, mimetype='application/json'):
+def response(replay, status=200, json_dumps=True, mimetype='application/json'):
     if json_dumps:
-        response = json.dumps(response)
-    return Response(response=response, status=status, mimetype=mimetype)
+        replay = json.dumps(replay)
+    return Response(response=replay, status=status, mimetype=mimetype)
 
 
 def bad_request(message="", code=400):

@@ -1,3 +1,5 @@
+import os
+
 import boto3
 import pandas as pd
 
@@ -28,6 +30,16 @@ def test_train():
 
 
 def test_save_and_load():
+    test_name = 'test-model-state'
+    model = Model()
+    model.fit(save=False)
+    path = model.save(model_name=test_name, upload=False)
+    model = Model.load(path)
+    assert len(model.predict(data.head(10))) > 0
+    os.remove(path)
+
+
+def test_upload_and_download():
     test_name = 'test-model'
     session = boto3.Session()
     s3 = session.resource('s3')
@@ -36,13 +48,27 @@ def test_save_and_load():
 
     model = Model()
     model.fit(save=False)
-    model.save(test_name)
-    model = Model.load(test_name)
+    path = model.save(test_name, upload=False)
+    model.upload(test_name, model_path=path)
+
+    path = Model.download(model_name=test_name)
+    model = Model.load(model_path=path)
     predictions = model.predict(data.head(10))
     assert len(predictions) == 10
     assert 1 in predictions
     assert 0 in predictions
 
+    obj = s3.Object(get_settings_value('models_bucket'), test_name)
+    obj.delete()
 
-def test_app():
-    pd.read_json(data.head(1).to_json())
+    model = Model()
+    model.fit(save=False)
+    model.save(model_name=test_name)
+    model = Model.load(model_name=test_name)
+    assert len(model.predict(data.head(10))) > 0
+
+
+def train_model():
+    model = Model()
+    model.fit(save=True,upload=True)
+

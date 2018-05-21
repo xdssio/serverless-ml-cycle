@@ -12,11 +12,7 @@ alias serverlessml >> ~/.bash_profile
 serverlessml:
 serverlessml>  virtualenv ve
 serverlessml> source ve/bin/activate
-serverlessml> pip install --no-binary -U numpy
-serverlessml> pip install --no-binary -U pandas
-serverlessml> pip install --no-binary -U sklearn
-serverlessml> pip install --no-binary -U sklearn_pandas
-serverlessml> pip install flask zappa boto3
+serverlessml> pip install pip==9.0.3
 serverlessml> pip install -r requirements.txt
 serverlessml> find . -name \*.pyc -delete
 
@@ -45,12 +41,12 @@ serverlessml> zappa unschedule dev
 
 
 ## Tests
-you can run locally with:   
+you can run locally from docker or in a virtual environment:   
 `python app.py`
 
 ```
 export URL=localhost:8080 # for testing locally
-export URL=https://gfjbjoo9b4.execute-api.eu-west-1.amazonaws.com/dev
+export URL=https://ptw0khsn6l.execute-api.eu-west-1.amazonaws.com/dev
 curl $URL/ping -w "\n\n"
 curl $URL/version -w "\n\n"
 curl  -X POST $URL/train -w "\n\n"
@@ -60,4 +56,6 @@ curl -H "Content-Type: application/json" -d "@./datasets/titanic.json" -X POST $
 
 
 ## for new data-science case
-Edit the *Model* class change  *preprocessing*, and *get_data* and you are good to go.
+1. Edit the necessary changes in *zappa_settings.json* file
+2. Edit the *Pipeline* in *ml/pipeline* and the *Model* class change *preprocessing*, and *get_data* and you are good to go
+* don't forget to change the *requirements.txt* if you use other libraries
