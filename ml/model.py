@@ -29,7 +29,7 @@ class Model:
         data['Pclass'] = data['Pclass'].astype('category')
         return data.dropna()
 
-    def fit(self, data=None, save=True, upload=True, path=None,):
+    def fit(self, data=None, save=True, upload=True, path=None):
         data = data if data is not None else self.get_data()
         data = self.preprocess(data)
         self.pipeline.fit(X=data[self.features], y=data[self.target])
@@ -102,24 +102,28 @@ class Model:
         if model_path is None:
             tmp_folder = get_settings_value('tmp_folder')
             model_path = '/'.join([tmp_folder, model_key])
-
+        model_location = "/".join(model_path.split('/')[:-1])
+        pathlib.Path(model_location).mkdir(parents=True, exist_ok=True)
         with open(model_path, "wb") as the_file:
             the_file.write(obj_string)
         print('model_path: %s' % model_path)
         return model_path
 
     @staticmethod
-    def load(model_path=None, model_name=None, version=0, bucket=None):
+    def load(model_name=None, version=0, model_path=None, bucket=None):
         if model_path is None:
+            print('download')
             model_path = Model.download(model_name=model_name, version=version, bucket=bucket)
         model = joblib.load(model_path)
         return model
 
-    def get_model_key(self, model_name=None, version=None):
-        version = version if version is not None else self.version
-        model_key_name = get_settings_value('model_key_name')
-        model_name = model_name if model_name else get_settings_value('model_name')
-        return '/'.join([model_name, str(version), model_key_name])
 
-    def get_estimator(self):
-        return self.pipeline.steps[-1][1]
+def get_model_key(self, model_name=None, version=None):
+    version = version if version is not None else self.version
+    model_key_name = get_settings_value('model_key_name')
+    model_name = model_name if model_name else get_settings_value('model_name')
+    return '/'.join([model_name, str(version), model_key_name])
+
+
+def get_estimator(self):
+    return self.pipeline.steps[-1][1]
