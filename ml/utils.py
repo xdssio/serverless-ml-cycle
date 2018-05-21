@@ -23,7 +23,7 @@ with open(zappa_settings_file, 'r') as f:
 
 
 def get_settings_value(key, stage='dev'):
-    return settings[stage].get(key)
+    return str(settings[stage].get(key))
 
 
 def list_model_versions(model_name=None):
