@@ -1,11 +1,9 @@
 import os
 
 import boto3
-import pandas as pd
 
 import config
 from ml.model import Model
-from ml.utils import get_settings_value
 
 data = Model.get_data()
 
@@ -71,5 +69,4 @@ def test_upload_and_download():
 
 def train_model():
     model = Model()
-    model.fit(save=True,upload=True)
-
+    model.fit(save=True, upload=True)
