@@ -4,6 +4,8 @@ import os
 
 import boto3
 
+import config
+
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -13,23 +15,18 @@ zappa_settings_file = 'zappa_settings.json'
 with open(zappa_settings_file, 'r') as f:
     settings = json.load(f)
 
-
-def get_settings_value(key, stage='dev'):
-    return settings[stage].get(key)
-
-
 with open(zappa_settings_file, 'r') as f:
     settings = json.load(f)
 
 
 def get_settings_value(key, stage='dev'):
-    return settings[stage].get(key)
+    return str(settings[stage].get(key))
 
 
 def list_model_versions(model_name=None):
     s3_connection = boto3.client('s3')
-    model_name = model_name if model_name else get_settings_value('model_name')
-    bucket = get_settings_value('models_bucket')
+    model_name = model_name if model_name else config.model_name
+    bucket = config.models_bucket
     ret = []
     for key in s3_connection.list_objects(Bucket=bucket)['Contents']:
         s3_path = key.get('Key')

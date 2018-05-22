@@ -3,6 +3,7 @@ import os
 import boto3
 import pandas as pd
 
+import config
 from ml.model import Model
 from ml.utils import get_settings_value
 
@@ -34,7 +35,7 @@ def test_save_and_load():
     model = Model()
     model.fit(save=False)
     path = model.save(model_name=test_name, upload=False)
-    model = Model.load(path)
+    model = Model.load(model_path=path)
     assert len(model.predict(data.head(10))) > 0
     os.remove(path)
 
@@ -43,7 +44,7 @@ def test_upload_and_download():
     test_name = 'test-model'
     session = boto3.Session()
     s3 = session.resource('s3')
-    obj = s3.Object(get_settings_value('models_bucket'), test_name)
+    obj = s3.Object(config.models_bucket, test_name)
     obj.delete()
 
     model = Model()
@@ -58,7 +59,7 @@ def test_upload_and_download():
     assert 1 in predictions
     assert 0 in predictions
 
-    obj = s3.Object(get_settings_value('models_bucket'), test_name)
+    obj = s3.Object(config.models_bucket, test_name)
     obj.delete()
 
     model = Model()
