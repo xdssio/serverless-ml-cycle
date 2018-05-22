@@ -1,5 +1,6 @@
 import datetime as dt
 import io
+import os
 import pathlib
 
 import boto3
@@ -99,33 +100,37 @@ class Model:
         return resp
 
     @staticmethod
-    def download(model_name=None, version=0, model_path=None, bucket=None):
+    def download(model_name=None, version=0, model_path=None, bucket=None, cache=True):
         s3 = boto3.client('s3')
         model_name = model_name if model_name else config.model_name
         model_key_name = config.model_key_name
         model_key = '/'.join([model_name, str(version), model_key_name])
         bucket = bucket if bucket else config.models_bucket
+
+        if model_path is None:
+            tmp_folder = config.tmp_folder
+            model_path = '/'.join([tmp_folder, model_key])
+
+        if os.path.exists(model_path) and cache:
+            return model_path
+
         try:
             obj_string = s3.get_object(Bucket=bucket, Key=model_key)['Body'].read()
         except:
             raise ValueError('Model name or version are bad')
 
-        if model_path is None:
-            tmp_folder = config.tmp_folder
-            model_path = '/'.join([tmp_folder, model_key])
         model_location = "/".join(model_path.split('/')[:-1])
 
         pathlib.Path(model_location).mkdir(parents=True, exist_ok=True)
         with open(model_path, "wb") as the_file:
             the_file.write(obj_string)
-        print('model_path: %s' % model_path)
         return model_path
 
     @staticmethod
-    def load(model_name=None, version=0, model_path=None, bucket=None):
+    def load(model_name=None, version=0, model_path=None, bucket=None, cache=True):
         if model_path is None:
             model_name = model_name if model_name else config.model_name
-            model_path = Model.download(model_name=model_name, version=version, bucket=bucket)
+            model_path = Model.download(model_name=model_name, version=version, bucket=bucket, cache=cache)
 
         model = joblib.load(model_path)
         return model
