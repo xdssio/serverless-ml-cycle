@@ -10,3 +10,4 @@ handler_venv
 .tmp/
 models/
 *.gz
+*.zip
