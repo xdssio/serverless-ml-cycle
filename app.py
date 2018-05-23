@@ -58,24 +58,23 @@ def ping(event=None, context=None):
 
 @app.route('/predict', methods=['GET', 'POST'])
 def predict(event=None, context=None):
-    logger.info('flask.request.content_type: %s' % flask.request.content_type)
+    logger.info('predict')
     try:
         data = request.get_data()
+
         if data is None:
+            logger.error('missing data to predict')
             ret = response("missing data to predict", status=400)
         else:
             data = pd.DataFrame(json.loads(data))
-            logger.debug('data- %s' % data)
-            logger.info('data parsed')
             predictions = model.predict(data)
-            logger.info('made predictions')
             predictions = pd.DataFrame({'prediction': predictions})
             predictions['index'] = range(len(predictions))
-            logger.debug('predictions- %s' % predictions)
             result = predictions.to_json(orient='records', index=True)
             resp = response(result, json_dumps=False)
             resp.headers["Content-Type"] = "application/json"
             ret = resp
+            logger.debug('return predictions' % predictions)
 
     except Exception as e:
         logger.debug(e)
