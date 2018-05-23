@@ -69,3 +69,9 @@ curl -H "Content-Type: application/json" -d "@./datasets/titanic.json" -X POST $
 1. Edit the necessary changes in *zappa_settings.json* file
 2. Edit the *Pipeline* in *ml/pipeline* and the *Model* class change *preprocessing*, and *get_data* and you are good to go
 * don't forget to change the *requirements.txt* if you use other libraries
+
+
+# DEMO
+export URL=https://u3inrapt1c.execute-api.eu-west-1.amazonaws.com/demo
+export URL=https://uvurxdi901.execute-api.eu-west-1.amazonaws.com/dev
+curl -H "Content-Type: application/json" -d "@./datasets/titanic.json" -X POST $URL/predict -w "\n\n"
