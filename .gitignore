@@ -9,3 +9,4 @@ docs
 handler_venv
 .tmp/
 models/
+*.gz
