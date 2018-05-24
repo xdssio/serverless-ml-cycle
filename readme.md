@@ -8,6 +8,7 @@ Serverless AI is a project demonstrating how to have the entire data science cyc
 * For the models versions
 * For the dataset
 2. Create an IAM role
+3. Download aws-cli and run `aws configure` woth your credentials from step 2.
 
 ## Local setup
 1. Clone the repo.
