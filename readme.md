@@ -1,5 +1,6 @@
 Serverless AI is a project demonstrating how to have the entire data science cycle as serverless
-#setup 
+
+# Setup 
 
 ## AWS setup 
 1. Create three buckets in AWS S3
@@ -9,11 +10,11 @@ Serverless AI is a project demonstrating how to have the entire data science cyc
 2. Create an IAM role
 
 ## Local setup
-1. clone me repo.
+1. Clone the repo.
 2. Create virtual environment and install the requirements 
 3. In the zappa settings, change the s3_bucket to your lambda bucket
 4. Explore the notebook and build your pipeline.
-5. edit the *ml.pipeline* file, the *zappa_settings.json* file the config as needed.
+5. Edit the *ml.pipeline* file, the *zappa_settings.json* file the config as needed.
 
 ## Virtual environment instructions 
 ```
